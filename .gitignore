@@ -1,0 +1,5 @@
+.idea/
+Makefile
+default.hcl
+config.hcl
+/zsh_autocomplete
