@@ -57,6 +57,37 @@ module "3" {
   depends_on = ["4"]
   source     = "/three"
 }`
+	inheritDeps = `module "1" {
+  disabled = true
+  depends_on = [
+    "2",
+  ]
+  source = "/one"
+}
+module "2" {
+  disabled = true
+  depends_on = [
+    "3","4","5"
+  ]
+  source = "/two"
+}
+module "3" {
+  disabled = true
+  depends_on = [
+    "",
+  ]
+  source = "/three"
+}
+module "4" {
+  disabled = true
+  depends_on = []
+  source = "/four"
+}
+module "5" {
+  disabled = true
+  depends_on = []
+  source = "/four"
+}`
 )
 
 func toFile(val string) string {
@@ -91,6 +122,11 @@ func TestModuleRewrite(t *testing.T) {
 		file:         toFile(singleDeps),
 		enable:       "2",
 		shouldEnable: []string{"2", "3"},
+	}, {
+		name:         "inherit dependency enables all-> 1,2,3,4,5",
+		file:         toFile(inheritDeps),
+		enable:       "1",
+		shouldEnable: []string{"1", "2", "3", "4", "5"},
 	}}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
